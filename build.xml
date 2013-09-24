@@ -1,0 +1,216 @@
+<?xml version="1.0"?>
+
+<!--
+  - PIDS build file
+  -
+  - Date Modified:  $Date: 2010-03-24 16:10:21 +1100 (Wed, 24 Mar 2010) $
+  - Version:        $Revision: 350 $
+  -->
+
+<project name="pids" default="build_wars" basedir=".">
+
+  <taskdef resource="net/sf/antcontrib/antlib.xml">
+  <classpath>
+    <pathelement location="/usr/share/ant/lib/ant-contrib-1.0b3.jar"/>
+  </classpath>
+</taskdef>
+
+  <!-- ============================================================= -->
+  <!-- Description                                                   -->
+  <!-- ============================================================= -->
+  <description>
+===================== DSpace platform build file =====================
+
+Common usage:
+
+  Fresh install, including database setup and registry loading:
+    % ant ;
+
+======================================================================
+  </description>
+
+  <!-- ============================================================= -->
+  <!-- Will be using various environment variables                   -->
+  <!-- ============================================================= -->
+
+  <property environment="env"/>
+	
+  <property name="config-dir" value="/usr/local/handle_server/svr_config/" />
+  <property name="prefix" value="10378.2" />
+  <property name="admin-ip" value="130.56.60.128" />
+
+  <path id="build.class.path">
+    <pathelement path="${env.CLASSPATH}"/>
+    <pathelement path="build/classes"/>
+    <fileset dir="lib">
+      <include name="**/*.jar"/>
+    </fileset>
+  </path>
+  <!-- ============================================================= -->
+  <!-- Copy web.xml as first step to facilitate prep work            -->
+  <!-- ============================================================= -->
+
+  <copy file="etc/web.xml"
+      tofile="build/web.xml"
+      preservelastmodified="true"/>
+  
+  <!-- ============================================================= -->
+  <!-- Compile the source code                                       -->
+  <!-- ============================================================= -->
+
+  <target name="compile"
+          description="Compile the source code">
+    <mkdir dir="${basedir}/build/classes"/>
+    <javac srcdir="${basedir}/src"
+           destdir="${basedir}/build/classes"
+           debug="on" deprecation="on">
+    	<!--compilerarg line="-Xlint"/-->
+    	<include name="**/*.java"/>
+      <classpath>
+        <pathelement path="${env.CLASSPATH}"/>
+        <pathelement path="${basedir}/build/classes"/>
+        <fileset dir="${basedir}/lib">
+          <include name="**/*.jar"/>
+        </fileset>
+      </classpath>
+    </javac>
+    <copy file="etc/web.xml"
+          tofile="build/web.xml"
+          preservelastmodified="true"/>
+    <copy todir="${basedir}/build/classes">
+      <fileset dir="${basedir}/src" includes="**/*.properties"/>
+    </copy>
+  </target>
+    
+	<!-- ============================================================= -->
+	<!-- Build the wars                                                -->
+	<!-- ============================================================= -->
+   
+<target name="build_wars"
+        depends="compile"
+        description="Build the .war files">
+
+    <copy file="etc/web.xml"
+        tofile="build/web.xml"
+        preservelastmodified="true"/>
+
+	    <if>
+	      <isset property="env.PIDS_HANDLE_CONFIG" />
+	      <then>
+	        <replace file="build/web.xml"
+	       	    token="@@config-dir@@"
+	       	    value="${env.PIDS_HANDLE_CONFIG}" />
+	      </then>
+	      <else>
+	         <replace file="build/web.xml"
+	            token="@@config-dir@@"
+	       	    value="${config-dir}" />
+	      </else>
+	    </if>
+	
+	    <if>
+	      <isset property="env.PIDS_ADMIN_IP" />
+	      <then>
+	       	<replace file="build/web.xml"
+		        token="@@admin-ip@@"
+		        value="${env.PIDS_ADMIN_IP}" />
+	      </then>
+	      <else>
+	        <replace file="build/web.xml"
+		        token="@@admin-ip@@"
+		        value="${admin-ip}" />
+	      </else>
+	    </if>
+	
+	    <if>
+	      <isset property="env.PIDS_HANDLE_PREFIX" />
+	      <then>
+	       	<replace file="build/web.xml"
+		        token="@@na@@"
+		        value="${env.PIDS_HANDLE_PREFIX}" />
+	      </then>
+	      <else>
+		    <replace file="build/web.xml"
+		        token="@@na@@"
+		        value="${prefix}" />
+	      </else>
+	    </if>
+
+     <copy file="etc/log4j.properties"
+      	todir="build/classes"
+  		preservelastmodified="true"/>
+     <war destfile="build/pids.war"
+          webxml="build/web.xml">
+         <lib dir="lib" />
+         <classes dir="build/classes" />
+     </war>
+</target>
+        
+  <!-- ============================================================= -->
+  <!-- Clean source code                                             -->
+  <!-- ============================================================= -->
+
+  <target name="clean"
+          description="Remove compiled files - does not affect installation">
+    <delete dir="${basedir}/build" />
+  </target>
+
+
+  <!-- ============================================================= -->
+  <!-- Create public API javadoc                                     -->
+  <!-- ============================================================= -->
+	
+	  <target name="javadoc"
+	          description="Create the javadoc documentation">
+	    <mkdir dir="${basedir}/build/javadoc" />
+	    <javadoc sourcepath="${basedir}/src"
+	             destdir="${basedir}/build/javadoc"
+	             author="true"
+	             version="true"
+	             access="public"
+	             doctitle="ANDS Persistent Identifier Service"
+	             windowtitle="ANDS PI Service"
+	             overview="${basedir}/src/overview.html"
+	             classpathref="build.class.path"
+	             noindex="false"
+	             notree="false">
+	      <package name="au.edu.apsr.pids.*"/>
+	      <!--package name="au.edu.apsr.pids.dao.*"/>
+	      <package name="au.edu.apsr.pids.security.*"/>
+          <package name="au.edu.apsr.pids.servlet.*"/>
+          <package name="au.edu.apsr.pids.to.*"/>
+          <package name="au.edu.apsr.pids.util.*"/-->
+	    </javadoc>
+	  </target>
+
+	<target name="run-tests" depends="compile" description="Run JUnit Tests">
+        <mkdir dir="${basedir}/build/reports/raw"/>
+		<mkdir dir="${basedir}/build/reports/html"/>
+	    <junit printsummary="yes" haltonfailure="yes" showoutput="yes" >
+	        <classpath>
+	            <pathelement path="${basedir}"/>
+	            <fileset dir="lib">
+	                <include name="**/*.jar"/>
+	            </fileset>
+	            <pathelement path="${env.CLASSPATH}"/>
+	            <pathelement path="${basedir}/build/classes"/>
+	         </classpath>
+             <sysproperty key="basedir" value="${basedir}"/>
+	         <batchtest fork="yes" todir="${basedir}/build/reports/raw">
+	            <formatter type="xml"/>
+	            <fileset dir="src">
+	                <include name="**/*JUnit*.java"/>
+	            </fileset>
+	         </batchtest>
+	    </junit>    
+	</target>
+	
+	<target name ="test" depends="run-tests">
+	        <junitreport todir="${basedir}/build/reports/raw">
+	          <fileset dir="${basedir}/build/reports/raw">
+	            <include name="TEST*.xml"/>
+	          </fileset>
+	          <report format="frames" todir="${basedir}/build/reports/html"/>
+	        </junitreport>
+	  </target>
+</project>
