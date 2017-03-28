@@ -76,6 +76,9 @@ Common usage:
         <fileset dir="${basedir}/lib">
           <include name="**/*.jar"/>
         </fileset>
+        <fileset dir="/opt/handle-svr/lib">
+          <include name="**/*.jar"/>
+        </fileset>
       </classpath>
     </javac>
     <copy file="etc/web.xml"
