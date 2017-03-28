@@ -104,7 +104,7 @@ public class AddTrustedClientServlet extends HttpServlet
         
         if (!request.getRemoteAddr().equals(adminIP))
         {
-            throw new ServletException("Service only available to service administrator");
+        	throw new ServletException("Service only available to service administrator not " + request.getRemoteAddr().toString());
         }
 
         try

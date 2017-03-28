@@ -35,9 +35,13 @@ Common usage:
 
   <property environment="env"/>
 	
-  <property name="config-dir" value="/usr/local/handle_server/svr_config/" />
-  <property name="prefix" value="10378.2" />
-  <property name="admin-ip" value="130.56.60.128" />
+	<property name="config-dir" value="/opt/handle-svr/svr1" />
+	<property name="prefix" value="10378.2" />
+	<property name="admin-ip" value="130.56.111.120" />
+	
+	<presetdef name="javac">
+		<javac includeantruntime="false" />
+	</presetdef>
 
   <path id="build.class.path">
     <pathelement path="${env.CLASSPATH}"/>

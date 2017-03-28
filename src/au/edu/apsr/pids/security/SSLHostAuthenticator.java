@@ -89,7 +89,7 @@ public class SSLHostAuthenticator implements Authenticator
         {
             try
             {
-                Handle handle = Handle.createAdmin(identifier, authDomain);
+            	Handle handle = Handle.createAdmin(identifier, authDomain, appId);
                 log.info("Identifier " + identifier + "," + authDomain + " is not a registered user of this service, added");
             }
             catch (DAOException daoe)
