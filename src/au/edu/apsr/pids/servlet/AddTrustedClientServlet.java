@@ -97,14 +97,20 @@ public class AddTrustedClientServlet extends HttpServlet
                   final HttpServletResponse response) throws ServletException
     {
         String adminIP = getInitParameter("admin-ip");
+        String ipAddress = request.getHeader("X-FORWARDED-FOR");
+        
         if (adminIP == null)
         {
             throw new ServletException("admin-ip not set, unable to run service");
         }
+          
+        if (ipAddress == null) {  
+           ipAddress = request.getRemoteAddr();  
+        }
         
-        if (!request.getRemoteAddr().equals(adminIP))
+        if (!ipAddress.equals(adminIP))
         {
-        	throw new ServletException("Service only available to service administrator not " + request.getRemoteAddr().toString());
+        	throw new ServletException("Service only available to service administrator not " + ipAddress.toString());
         }
 
         try

@@ -139,7 +139,8 @@
      <res-auth>Container</res-auth>
   </resource-ref>
 
-  <security-constraint>
+<!--  not needed if security is done via apache -->
+  <!--security-constraint>
     <web-resource-collection>
       <web-resource-name>SSL Redirection</web-resource-name>
       <url-pattern>/mint</url-pattern>
@@ -156,6 +157,6 @@
     <user-data-constraint>
       <transport-guarantee>CONFIDENTIAL</transport-guarantee>
     </user-data-constraint>
-   </security-constraint>
+   </security-constraint-->
    
 </web-app>

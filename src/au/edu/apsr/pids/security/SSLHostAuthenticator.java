@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.log4j.Logger;
 
 import net.handle.hdllib.HandleException;
-
 import au.edu.apsr.pids.dao.DAOException;
 import au.edu.apsr.pids.to.Handle;
 import au.edu.apsr.pids.to.Identifier;
@@ -61,7 +60,14 @@ public class SSLHostAuthenticator implements Authenticator
      */
     public boolean authenticate(HttpServletRequest request) throws ProcessingException
     {
-        TrustedClient tc = TrustedClient.retrieve(request.getRemoteAddr());
+        
+    	String ipAddress = request.getHeader("X-FORWARDED-FOR");
+        
+    	if (ipAddress == null) {  
+            ipAddress = request.getRemoteAddr();  
+         }
+        
+    	TrustedClient tc = TrustedClient.retrieve(ipAddress);
         
         if (tc == null)
         {
