@@ -47,7 +47,7 @@
     </init-param>
     <init-param>
       <param-name>config-dir</param-name>
-      <param-value>@@config-dir@@</param-val
+      <param-value>@@config-dir@@</param-value>
     </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>
