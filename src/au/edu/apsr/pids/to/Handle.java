@@ -156,7 +156,8 @@ public class Handle
      * @throws HandleException
      */
     public static Handle createAdmin(String identifier,
-                                     String authDomain) throws DAOException, HandleException
+    		                         String authDomain,
+    		                         String appId) throws DAOException, HandleException
     {
         Handle handleObject = new Handle();
 
@@ -166,7 +167,7 @@ public class Handle
 
         AdminRecord admin = handleObject.createAdminRecord(Constants.NA_HANDLE_PREFIX + hc.getPrefix(), Constants.ADMIN_GROUP_IDX);
 
-        HandleValue values[] = new HandleValue[3];
+        HandleValue values[] = new HandleValue[4];
 
         values[0] = new HandleValue();
         values[0].setIndex(Constants.AGENT_DESC_IDX);
@@ -186,6 +187,13 @@ public class Handle
         values[2].setType(Constants.XT_AGENTID);
         values[2].setData(Util.encodeString(handleObject.getHandle()));
         values[2].setTTL(Constants.DEFAULT_TTL);
+        
+        values[3] = new HandleValue();
+        values[3].setIndex(Constants.AGENT_DESC_APPIDX);
+        values[3].setType(Constants.XT_APPID);
+        values[3].setAnyoneCanRead(false);
+        values[3].setData(Util.encodeString(appId));
+        values[3].setTTL(Constants.DEFAULT_TTL);
 
         AbstractResponse response = handleObject.createHandle(values);
 

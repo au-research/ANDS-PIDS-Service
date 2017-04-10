@@ -144,7 +144,7 @@ public class HandleDAO
         try
         {
             c = datasource.getConnection();
-            c.setAutoCommit(false);
+            c.setAutoCommit(true);
             
             ps = c.prepareStatement(SELECT_NEXT_SUFFIX_SQL);
             rs = ps.executeQuery();

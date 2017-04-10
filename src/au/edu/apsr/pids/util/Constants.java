@@ -37,6 +37,9 @@ public class Constants
 
     /** The non-server handle admin index */
     public static final int AGENT_DESC_IDX = 102;
+    
+    /** The non-server handle admin appId */
+    public static final int AGENT_DESC_APPIDX = 103;
 
     /** The admin group index */
     public static final int ADMIN_GROUP_IDX = 200;
@@ -55,7 +58,10 @@ public class Constants
     
     /** Separator for key value args in request body */
     public static final String PROPERTY_SEPARATOR = "=";
-
+    
+    /** APPID string in byte form */
+    public static final byte XT_APPID[] = Util.encodeString("APPID");
+    
     /** DESC string in byte form */
     public static final byte XT_TYPE_DESC[] = Util.encodeString("DESC");
 

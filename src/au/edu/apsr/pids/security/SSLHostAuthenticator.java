@@ -25,7 +25,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.log4j.Logger;
 
 import net.handle.hdllib.HandleException;
-
 import au.edu.apsr.pids.dao.DAOException;
 import au.edu.apsr.pids.to.Handle;
 import au.edu.apsr.pids.to.Identifier;
@@ -61,7 +60,14 @@ public class SSLHostAuthenticator implements Authenticator
      */
     public boolean authenticate(HttpServletRequest request) throws ProcessingException
     {
-        TrustedClient tc = TrustedClient.retrieve(request.getRemoteAddr());
+        
+    	String ipAddress = request.getHeader("X-FORWARDED-FOR");
+        
+    	if (ipAddress == null) {  
+            ipAddress = request.getRemoteAddr();  
+         }
+        
+    	TrustedClient tc = TrustedClient.retrieve(ipAddress);
         
         if (tc == null)
         {
@@ -89,7 +95,7 @@ public class SSLHostAuthenticator implements Authenticator
         {
             try
             {
-                Handle handle = Handle.createAdmin(identifier, authDomain);
+            	Handle handle = Handle.createAdmin(identifier, authDomain, appId);
                 log.info("Identifier " + identifier + "," + authDomain + " is not a registered user of this service, added");
             }
             catch (DAOException daoe)
