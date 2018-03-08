@@ -357,9 +357,11 @@ public class PIDSJUnit
 	private Document doConn(URL url, String params) throws Exception
 	{
 		int responseCode = 0;
-		HttpsURLConnection conn = null;
+		//HttpURLConnection conn = null;
+		
+		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 
-		conn = (HttpsURLConnection)url.openConnection();
+		conn = (HttpURLConnection) url.openConnection();
 		conn.setConnectTimeout(10000);
 		conn.setRequestMethod("POST");
 		conn.setAllowUserInteraction(false);
