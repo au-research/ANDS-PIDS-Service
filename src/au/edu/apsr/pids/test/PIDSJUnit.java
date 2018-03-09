@@ -176,11 +176,11 @@ public class PIDSJUnit
 		assertTrue(descFromResponse(response, index).equals(desc));
 	}
 
-	@Test public void testModifyValueByIndex() throws Exception
+	 @Test public void testModifyValueByIndex() throws Exception
 	{
 		Integer index = 53;
 		String handle = handleFromResponse(mint(index));
-		String newUrl = "https://20.1.4.99:778/test:test-\u5443.0";
+		String newUrl = "https://20.1.4.99:778/test:test0";
 
 		URL url = new URL(properties.getProperty("PIDSService") +
 			"/modifyValueByIndex?type=URL&value=" + newUrl +
@@ -191,7 +191,7 @@ public class PIDSJUnit
 
 		assertTrue(handleFromResponse(response).equals(handle));
 		assertTrue(urlFromResponse(response, index).equals(newUrl));
-	}
+	} 
 
 	@Test public void testDeleteValueByIndex() throws Exception
 	{
@@ -240,7 +240,7 @@ public class PIDSJUnit
 		assertTrue(handle.equals(handleFromResponse(response)));
 	}
 
-	@Test public void testGetNonexistentHandle() throws Exception
+	 @Test public void testGetNonexistentHandle() throws Exception
 	{
 		String handle = "THIS+IS+NOT+A+HANDLE";
 
@@ -249,7 +249,7 @@ public class PIDSJUnit
 			"handle=" + handle);
 		Document response = doConn(url, params);
 		assertTrue(check(response).equals("failure"));
-	}
+	} 
 
 	@Test public void testMintUndefinedType() throws Exception
 	{
