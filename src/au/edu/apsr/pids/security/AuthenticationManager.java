@@ -96,6 +96,7 @@ public class AuthenticationManager
                             if (name.length() !=0 && value.length() != 0)
                             {
                                 properties.put(name, value);
+                                System.out.println(name);
                             }
                         }
                     }

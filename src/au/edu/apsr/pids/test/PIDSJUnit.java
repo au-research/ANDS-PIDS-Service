@@ -56,7 +56,10 @@ public class PIDSJUnit
 			"\"/>\n" +
 			"        <property name=\"appId\" value=\"" +
 			properties.getProperty("appId") + 
-			"\"/>\n" +		
+			"\"/>\n" +
+			"        <property name=\"sharedSecret\" value=\"" +
+            properties.getProperty("sharedSecret") + 
+            "\"/>\n" +		
 			"    </properties>\n" +
 			"</request>";
 
@@ -291,9 +294,16 @@ public class PIDSJUnit
 			"&handle=" + handle);
 		response = doConn(url, params);
 		assertTrue(check(response).equals("failure"));
-	}
+	} 
 
-
+    @Test public void testAccessBySharedSecret() throws Exception
+    {
+        URL url = new URL(properties.getProperty("PIDSService") + "/mint?type=DESC&value=testvalue" +
+            "&index=55");
+        Document response = doConn(url, params);
+        assertTrue(check(response).equals("success"));
+    }
+    
 	private String descFromResponse(Document response) throws Exception
 	{
 		return xPath.evaluate("/response/identifier/property[@type='DESC']/@value", response.getDocumentElement());
@@ -357,7 +367,6 @@ public class PIDSJUnit
 	private Document doConn(URL url, String params) throws Exception
 	{
 		int responseCode = 0;
-		//HttpURLConnection conn = null;
 		
 		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 
@@ -375,16 +384,7 @@ public class PIDSJUnit
 		out.flush();
 		out.close();
 		responseCode = conn.getResponseCode();
-		/*        
-			  BufferedReader in = new BufferedReader (new InputStreamReader(conn.getInputStream()));
-			  String temp;
-			  String response = "";
-			  while ((temp = in.readLine()) != null)
-			  {
-			  response += temp + "\n";
-			  }
-			  temp = null;
-			  in.close(); */
+
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = factory.newDocumentBuilder();
 		Document d = builder.parse(conn.getInputStream());
