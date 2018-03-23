@@ -131,7 +131,7 @@ public class Handle
 
         if (response.responseCode == AbstractMessage.RC_SUCCESS)
         {
-            log.info("Successfully created handle: " + handleObject.getHandle());
+            log.info("Successfully created handle: " + handleObject.getHandle() + " Identifier: " + identifier.getIdentifier() + " authDomain: " + identifier.getAuthDomain() + "appId: " + identifier.getAppid());
             return handleObject;
         }
         else
