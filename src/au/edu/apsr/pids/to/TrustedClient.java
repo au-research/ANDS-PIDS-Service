@@ -81,12 +81,12 @@ public class TrustedClient
      *              the trusted client ip address
      * @throws DAOException
      */
-    public static boolean isRegistered(String appId, String ip, String sharedSecret) throws ProcessingException
+    public static boolean isRegistered(String ip, String sharedSecret) throws ProcessingException
     {
         try
         {
             TrustedClientDAO tcdao = new TrustedClientDAO();
-            if (tcdao.retrieve(appId, ip, sharedSecret) == null)
+            if (tcdao.retrieve(ip, sharedSecret) == null)
             {
                 return false;
             }
@@ -111,13 +111,12 @@ public class TrustedClient
      *              the appId
      * @throws ProcessingException
      */
-    public static TrustedClient retrieve(String appId, String ip, String sharedSecret) throws ProcessingException
+    public static TrustedClient retrieve(String ip, String sharedSecret) throws ProcessingException
     {
         try
         {
             TrustedClientDAO tcdao = new TrustedClientDAO();
-            log.info("creating a trusted client object");
-             return tcdao.retrieve(appId, ip, sharedSecret);
+             return tcdao.retrieve(ip, sharedSecret);
         }
         catch (DAOException daoe)
         {
@@ -133,15 +132,24 @@ public class TrustedClient
      *              the ip address
      * @param description
      *        plain text description of the client
-     * 
+     * @param sharedSecret
+     *        the shared secret
+     *        
      * @throws DAOException
      */
     public static TrustedClient create(String ip,
-                                       String description, String sharedSecret) throws ProcessingException
+                                       String description, 
+                                       String sharedSecret) throws ProcessingException
     {
+        String appId = null;
+        if(ip == null || ip.trim().equals("")) {
+            appId = calculateHash(sharedSecret);
+        } else {
+            appId = calculateHash(ip);
+        }
         try
         {
-            TrustedClient tc = new TrustedClient(ip, calculateHash(ip), description, sharedSecret); 
+            TrustedClient tc = new TrustedClient(ip, appId, description, sharedSecret); 
             TrustedClientDAO tcdao = new TrustedClientDAO();
             tcdao.create(tc);
             return tc;
@@ -162,12 +170,15 @@ public class TrustedClient
      *        plain text description of the client
      * @param appId
      *        the appId of the client
-     * 
+     * @param sharedSecret
+     *        the shared secret     
+     *         
      * @throws DAOException
      */
     public static TrustedClient create(String ip,
+                                       String appId,
                                        String description,
-                                       String appId, String sharedSecret) throws ProcessingException
+                                       String sharedSecret) throws ProcessingException
     {
         try
         {

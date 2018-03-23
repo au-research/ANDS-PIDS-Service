@@ -83,7 +83,7 @@ public class SSLHostAuthenticator implements Authenticator
             ipAddress = request.getRemoteAddr();  
          }
     	    
-    	    TrustedClient tc = TrustedClient.retrieve(appId, ipAddress, sharedSecret);
+    	    TrustedClient tc = TrustedClient.retrieve(ipAddress, sharedSecret);
     	    
         if (tc == null)
         {

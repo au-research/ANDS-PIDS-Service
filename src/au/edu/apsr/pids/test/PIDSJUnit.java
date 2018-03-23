@@ -97,14 +97,16 @@ public class PIDSJUnit
 	{
 		String testUrl = "http://example.org/PIDS-URL-Test";
 		URL url = new URL(properties.getProperty("PIDSService") + "/mint?type=URL&value=" + testUrl);
+		System.out.println("about to connect");
 		Document response = doConn(url, params);
+		System.out.println(response.toString());
 
 		assertTrue(check(response).equals("success"));
 
 		assertTrue(urlFromResponse(response).equals(testUrl));
 	}
 
-	@Test public void testMintDescType() throws Exception
+	/* @Test public void testMintDescType() throws Exception
 	{
 		URL url = new URL(properties.getProperty("PIDSService") + "/mint?type=DESC&value=ABC");
 		Document response = doConn(url, params);
@@ -302,7 +304,7 @@ public class PIDSJUnit
             "&index=55");
         Document response = doConn(url, params);
         assertTrue(check(response).equals("success"));
-    }
+    } */
     
 	private String descFromResponse(Document response) throws Exception
 	{
@@ -367,7 +369,7 @@ public class PIDSJUnit
 	private Document doConn(URL url, String params) throws Exception
 	{
 		int responseCode = 0;
-		
+
 		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 
 		conn = (HttpURLConnection) url.openConnection();
@@ -383,8 +385,7 @@ public class PIDSJUnit
 		out.write(params);
 		out.flush();
 		out.close();
-		responseCode = conn.getResponseCode();
-
+		System.out.println(responseCode);
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = factory.newDocumentBuilder();
 		Document d = builder.parse(conn.getInputStream());
