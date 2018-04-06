@@ -64,8 +64,8 @@ public class HandleDAO
         "SELECT handle " + 
         "FROM handles " +
         "WHERE data = ? " +
-        "AND CAST(CAST(SUBSTRING(handle FROM ?) AS TEXT) AS BIGINT) > ? " + 
-        "ORDER BY CAST(CAST(SUBSTRING(handle FROM ?) AS TEXT) AS BIGINT)";
+        "AND SUBSTRING(handle FROM ?) > ? " + 
+        "ORDER BY SUBSTRING(handle FROM ?) ";
 
     private static final String SELECT_SINGLE_HANDLE_SQL = 
         "SELECT handle, idx, type, data " + 
@@ -76,7 +76,7 @@ public class HandleDAO
     private static final String SELECT_HANDLES_SUFFIX_ORDER_SQL =
         "SELECT * FROM handles " +
         "WHERE type = 'URL' " + 
-        "ORDER BY CAST(CAST(SUBSTRING(handle FROM 13) AS TEXT) AS BIGINT);";
+        "ORDER BY SUBSTRING(handle FROM 13);";
 
     private static final String SELECT_HANDLES_BY_DATA_SQL = 
         "SELECT handle, idx, type, data " + 

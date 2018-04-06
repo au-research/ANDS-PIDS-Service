@@ -52,16 +52,16 @@ public class TrustedClientDAO
     private DataSource datasource;
     
     private static final String SELECT_CLIENT_SQL = 
-        "SELECT ip_address, app_id, description " +
-        "FROM trusted_client WHERE ip_address = ?";
-		
+        "SELECT ip_address, app_id, description, shared_secret " +
+        "FROM trusted_client WHERE (shared_secret = ? AND shared_secret IS NOT NULL) OR (ip_address = ? AND ip_address IS NOT NULL AND ip_address <> '')";
+
 	private static final String SELECT_ALLCLIENTS_SQL = 
-        "SELECT ip_address, app_id, description " +
+        "SELECT ip_address, app_id, description, shared_secret " +
         "FROM trusted_client ORDER BY app_id DESC";
 
     private static final String INSERT_CLIENT_SQL = 
-        "INSERT INTO trusted_client (ip_address, app_id, description) " +
-        "VALUES (?, ?, ?)";
+        "INSERT INTO trusted_client (ip_address, app_id, description, shared_secret) " +
+        "VALUES (?, ?, ?, ?)";
     
     /**
      * create an Identifier DAO
@@ -104,7 +104,7 @@ public class TrustedClientDAO
      *          
      * @exception DAOException
      */
-    public TrustedClient retrieve(String ip) throws DAOException
+    public TrustedClient retrieve(String ipAddress, String sharedSecret) throws DAOException
     {
         Connection c = null; 
         
@@ -116,15 +116,15 @@ public class TrustedClientDAO
         {
             c = datasource.getConnection();
             c.setAutoCommit(false);
-            
             ps = c.prepareStatement(SELECT_CLIENT_SQL);
-            ps.setString(1, ip);
+            ps.setString(1, sharedSecret);
+            ps.setString(2, ipAddress);
             rs = ps.executeQuery();
             
             TrustedClient id = null;
             if (rs.next())
             {
-                id = new TrustedClient(ip, rs.getString("app_id"), rs.getString("description"));
+                id = new TrustedClient(rs.getString("ip_address"),rs.getString("app_id"), rs.getString("description"),rs.getString("shared_secret"));
 //                id.setID(rs.getInt("identifier_id"));
             }
             return id;
@@ -168,7 +168,7 @@ public class TrustedClientDAO
             ArrayList<TrustedClient> clients = new ArrayList<TrustedClient>();
             while (rs.next())
             {
-                clients.add(new TrustedClient(rs.getString("ip_address"), rs.getString("app_id"), rs.getString("description")));
+                clients.add(new TrustedClient(rs.getString("ip_address"),rs.getString("app_id"), rs.getString("description"),rs.getString("sharedSecret")));
             }
             return clients;
         }
@@ -207,6 +207,7 @@ public class TrustedClientDAO
             ps.setString(1, tc.getIP());
             ps.setString(2, tc.getAppId());            
             ps.setString(3, tc.getDescription());            
+            ps.setString(4, tc.getSharedSecret());            
             ps.executeUpdate();
             ps.close();
             ps = null;

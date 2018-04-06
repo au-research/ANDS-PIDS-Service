@@ -42,6 +42,7 @@ public class Identifier
     private String handle = null;
     private String hash = null;
     private String adminKey = null;
+    private String appId = null;
     
 
     /** 
@@ -142,6 +143,17 @@ public class Identifier
     {
         return this.handle;
     }
+    /** 
+     * Return the app_id of this identifier
+     * 
+     * @return String
+     *          the app_id of the identifier or <code>null</code> if this
+     *          Identifier has not been assigned a handle
+     */    
+    public String getAppid()
+    {
+        return this.appId;
+    }
     
     /**
      * Set the handle of this identifier
@@ -154,6 +166,16 @@ public class Identifier
         this.handle = handle;
     }
     
+    /**
+     * Set the app_id of this identifier
+     * 
+     * @param handle
+     *         the handle to assign the Identifier
+     */    
+    public void setAppId(String appId)
+    {
+        this.appId = appId;
+    }   
 
     /** 
      * Return the agent identifier string

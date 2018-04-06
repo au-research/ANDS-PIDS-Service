@@ -53,8 +53,12 @@ public class IdentifierDAO
     private static final String SELECT_IDENTIFIER_SQL = 
         "SELECT handle, data " +
         "FROM handles WHERE data = ? " +
-        "AND type = ?";
-    
+        "AND type = ?"
+        ;
+    private static final String SELECT_APPID_SQL = 
+            "SELECT handle, data " +
+            "FROM handles WHERE handle = ?" +
+            "AND type = ?";
     /**
      * create an Identifier DAO
      * 
@@ -123,9 +127,57 @@ public class IdentifierDAO
             {
                 id = new Identifier(identifier, authDomain);
                 id.setHandle(Util.decodeString(rs.getBytes("handle")));
+                id.setAppId(retrieveAppid(Util.decodeString(rs.getBytes("handle"))));
 //                id.setID(rs.getInt("identifier_id"));
             }
             return id;
+        }
+        catch (SQLException sqle)
+        {
+            log.error("SQLException occurred", sqle);
+            throw new DAOException(sqle);
+        }
+        finally
+        {
+            JDBCSupport.closeObjects(rs, ps, c);
+        }
+    }
+    
+    /**
+     * obtain an identifier record
+     * 
+     * @return app_id
+     *           An app_id  if found, null if not found
+     *           
+     * @param handle
+     *          The handle
+     *          
+     * @exception DAOException
+     */
+    public String retrieveAppid(String handle
+                               ) throws DAOException
+    {
+        Connection c = null; 
+        
+        PreparedStatement ps = null;
+        
+        ResultSet rs = null;
+        try
+        {
+            c = datasource.getConnection();
+            c.setAutoCommit(false);
+            
+            ps = c.prepareStatement(SELECT_APPID_SQL);
+            ps.setString(1, handle);
+            ps.setBytes(2, Constants.XT_APPID);
+            
+            rs = ps.executeQuery();
+            String appId = null;
+            if (rs.next())
+            {
+                appId = Util.decodeString(rs.getBytes("data"));
+            }
+            return appId ;
         }
         catch (SQLException sqle)
         {

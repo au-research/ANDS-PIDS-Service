@@ -56,7 +56,10 @@ public class PIDSJUnit
 			"\"/>\n" +
 			"        <property name=\"appId\" value=\"" +
 			properties.getProperty("appId") + 
-			"\"/>\n" +		
+			"\"/>\n" +
+			"        <property name=\"sharedSecret\" value=\"" +
+            properties.getProperty("sharedSecret") + 
+            "\"/>\n" +		
 			"    </properties>\n" +
 			"</request>";
 
@@ -94,14 +97,16 @@ public class PIDSJUnit
 	{
 		String testUrl = "http://example.org/PIDS-URL-Test";
 		URL url = new URL(properties.getProperty("PIDSService") + "/mint?type=URL&value=" + testUrl);
+		System.out.println("about to connect");
 		Document response = doConn(url, params);
+		System.out.println(response.toString());
 
 		assertTrue(check(response).equals("success"));
 
 		assertTrue(urlFromResponse(response).equals(testUrl));
 	}
 
-	@Test public void testMintDescType() throws Exception
+	/* @Test public void testMintDescType() throws Exception
 	{
 		URL url = new URL(properties.getProperty("PIDSService") + "/mint?type=DESC&value=ABC");
 		Document response = doConn(url, params);
@@ -176,11 +181,11 @@ public class PIDSJUnit
 		assertTrue(descFromResponse(response, index).equals(desc));
 	}
 
-	@Test public void testModifyValueByIndex() throws Exception
+	 @Test public void testModifyValueByIndex() throws Exception
 	{
 		Integer index = 53;
 		String handle = handleFromResponse(mint(index));
-		String newUrl = "https://20.1.4.99:778/test:test-\u5443.0";
+		String newUrl = "https://20.1.4.99:778/test:test0";
 
 		URL url = new URL(properties.getProperty("PIDSService") +
 			"/modifyValueByIndex?type=URL&value=" + newUrl +
@@ -191,7 +196,7 @@ public class PIDSJUnit
 
 		assertTrue(handleFromResponse(response).equals(handle));
 		assertTrue(urlFromResponse(response, index).equals(newUrl));
-	}
+	} 
 
 	@Test public void testDeleteValueByIndex() throws Exception
 	{
@@ -240,7 +245,7 @@ public class PIDSJUnit
 		assertTrue(handle.equals(handleFromResponse(response)));
 	}
 
-	@Test public void testGetNonexistentHandle() throws Exception
+	 @Test public void testGetNonexistentHandle() throws Exception
 	{
 		String handle = "THIS+IS+NOT+A+HANDLE";
 
@@ -249,7 +254,7 @@ public class PIDSJUnit
 			"handle=" + handle);
 		Document response = doConn(url, params);
 		assertTrue(check(response).equals("failure"));
-	}
+	} 
 
 	@Test public void testMintUndefinedType() throws Exception
 	{
@@ -291,9 +296,16 @@ public class PIDSJUnit
 			"&handle=" + handle);
 		response = doConn(url, params);
 		assertTrue(check(response).equals("failure"));
-	}
+	} 
 
-
+    @Test public void testAccessBySharedSecret() throws Exception
+    {
+        URL url = new URL(properties.getProperty("PIDSService") + "/mint?type=DESC&value=testvalue" +
+            "&index=55");
+        Document response = doConn(url, params);
+        assertTrue(check(response).equals("success"));
+    } */
+    
 	private String descFromResponse(Document response) throws Exception
 	{
 		return xPath.evaluate("/response/identifier/property[@type='DESC']/@value", response.getDocumentElement());
@@ -357,9 +369,10 @@ public class PIDSJUnit
 	private Document doConn(URL url, String params) throws Exception
 	{
 		int responseCode = 0;
-		HttpsURLConnection conn = null;
 
-		conn = (HttpsURLConnection)url.openConnection();
+		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+
+		conn = (HttpURLConnection) url.openConnection();
 		conn.setConnectTimeout(10000);
 		conn.setRequestMethod("POST");
 		conn.setAllowUserInteraction(false);
@@ -372,17 +385,7 @@ public class PIDSJUnit
 		out.write(params);
 		out.flush();
 		out.close();
-		responseCode = conn.getResponseCode();
-		/*        
-			  BufferedReader in = new BufferedReader (new InputStreamReader(conn.getInputStream()));
-			  String temp;
-			  String response = "";
-			  while ((temp = in.readLine()) != null)
-			  {
-			  response += temp + "\n";
-			  }
-			  temp = null;
-			  in.close(); */
+		System.out.println(responseCode);
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = factory.newDocumentBuilder();
 		Document d = builder.parse(conn.getInputStream());
