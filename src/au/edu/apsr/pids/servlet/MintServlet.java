@@ -122,7 +122,7 @@ public class MintServlet extends HttpServlet
         try
         {
             auth = AuthenticationManager.getAuthenticator(request);
-            System.out.println(request.toString());
+
             if (!auth.authenticate(request))
             {
                 log.error("Authentication failed from host " + request.getRemoteHost());

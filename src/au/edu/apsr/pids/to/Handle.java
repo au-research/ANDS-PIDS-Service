@@ -51,7 +51,10 @@ import au.edu.apsr.pids.util.ProcessingException;
 import au.edu.apsr.pids.util.ServletSupport;
 
 import org.apache.log4j.Logger;
+import org.json.simple.*;
 
+import java.io.IOException;
+import java.io.StringWriter;
 /**
  * Class representing a Handle object
  * 
@@ -92,9 +95,10 @@ public class Handle
      *           an array of HandleValue objects to be added to the handle
      * @throws DAOException
      * @throws HandleException
+     * @throws IOException 
      */
     public static Handle create(Identifier identifier,
-                                HandleValue[] hv) throws DAOException, HandleException
+                                HandleValue[] hv) throws DAOException, HandleException, IOException
     {
         Handle handleObject = new Handle();
         
@@ -104,7 +108,7 @@ public class Handle
         String idHash = null;
         AdminRecord admin = handleObject.createAdminRecord(Constants.NA_HANDLE_PREFIX + hc.getPrefix(), Constants.ADMIN_GROUP_IDX);
         
-        HandleValue values[] = new HandleValue[hv.length + 2];
+        HandleValue values[] = new HandleValue[hv.length + 3];
 
         // load the passed values into the value array
         int i;
@@ -127,11 +131,29 @@ public class Handle
         values[i+1].setData(Util.encodeString(identifier.getHandle()));
         values[i+1].setTTL(Constants.DEFAULT_TTL);
         
+        values[i+2] = new HandleValue();
+        values[i+2].setIndex(Constants.AGENT_DESC_APPIDX);
+        values[i+2].setType(Constants.XT_APPID);
+        values[i+2].setAnyoneCanRead(false);
+        values[i+2].setData(Util.encodeString(identifier.getAppid()));
+        values[i+2].setTTL(Constants.DEFAULT_TTL);
+        
         AbstractResponse response = handleObject.createHandle(values);
 
         if (response.responseCode == AbstractMessage.RC_SUCCESS)
         {
-            log.info("Successfully created handle: " + handleObject.getHandle() + " Identifier: " + identifier.getIdentifier() + " authDomain: " + identifier.getAuthDomain() + "appId: " + identifier.getAppid());
+            JSONObject obj = new JSONObject();
+
+            obj.put("status","success");
+            obj.put("handle",handleObject.getHandle());
+            obj.put("identifier",identifier.getIdentifier());
+            obj.put("authDomain",identifier.getAuthDomain() );
+            obj.put("appId",identifier.getAppid());
+            StringWriter out = new StringWriter();
+            obj.writeJSONString(out);
+            
+            String jsonText = out.toString();
+            log.info(jsonText);
             return handleObject;
         }
         else
