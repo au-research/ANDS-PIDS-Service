@@ -53,7 +53,8 @@ public class TrustedClientDAO
     
     private static final String SELECT_CLIENT_SQL = 
         "SELECT ip_address, app_id, description, shared_secret " +
-        "FROM trusted_client WHERE (shared_secret = ? AND shared_secret IS NOT NULL) OR (ip_address = ? AND ip_address IS NOT NULL AND ip_address <> '')";
+        "FROM trusted_client " +
+        "WHERE ((shared_secret = ? AND shared_secret IS NOT NULL) OR (ip_address = ? AND ip_address IS NOT NULL AND ip_address <> '')) AND app_id = ?";
 
 	private static final String SELECT_ALLCLIENTS_SQL = 
         "SELECT ip_address, app_id, description, shared_secret " +
@@ -104,7 +105,7 @@ public class TrustedClientDAO
      *          
      * @exception DAOException
      */
-    public TrustedClient retrieve(String ipAddress, String sharedSecret) throws DAOException
+    public TrustedClient retrieve(String ipAddress, String sharedSecret, String appId) throws DAOException
     {
         Connection c = null; 
         
@@ -119,6 +120,7 @@ public class TrustedClientDAO
             ps = c.prepareStatement(SELECT_CLIENT_SQL);
             ps.setString(1, sharedSecret);
             ps.setString(2, ipAddress);
+            ps.setString(3, appId);
             rs = ps.executeQuery();
             
             TrustedClient id = null;

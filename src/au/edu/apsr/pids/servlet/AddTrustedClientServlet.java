@@ -156,7 +156,7 @@ public class AddTrustedClientServlet extends HttpServlet
                 return;
             }
 
-            if (TrustedClient.isRegistered(ip, sharedSecret))
+            if (TrustedClient.isRegistered(ip, sharedSecret, appId))
             {
                 log.error("The ip address or shared secret provided is already registered");
                 ServletSupport.doErrorResponse(response, "The ip address or shared secret provided is already registered", Constants.MESSAGE_TYPE_USER);                
