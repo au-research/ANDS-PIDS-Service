@@ -81,12 +81,12 @@ public class TrustedClient
      *              the trusted client ip address
      * @throws DAOException
      */
-    public static boolean isRegistered(String ip, String sharedSecret) throws ProcessingException
+    public static boolean isRegistered(String ip, String sharedSecret, String appId) throws ProcessingException
     {
         try
         {
             TrustedClientDAO tcdao = new TrustedClientDAO();
-            if (tcdao.retrieve(ip, sharedSecret) == null)
+            if (tcdao.retrieve(ip, sharedSecret, appId) == null)
             {
                 return false;
             }
@@ -111,12 +111,12 @@ public class TrustedClient
      *              the appId
      * @throws ProcessingException
      */
-    public static TrustedClient retrieve(String ip, String sharedSecret) throws ProcessingException
+    public static TrustedClient retrieve(String ip, String sharedSecret, String appId) throws ProcessingException
     {
         try
         {
             TrustedClientDAO tcdao = new TrustedClientDAO();
-             return tcdao.retrieve(ip, sharedSecret);
+             return tcdao.retrieve(ip, sharedSecret, appId);
         }
         catch (DAOException daoe)
         {
