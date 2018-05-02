@@ -41,6 +41,7 @@ public class TrustedClient
     private String ip = null;
     private String appId = null;
     private String description = null;
+    private String sharedSecret = null;
     
     /** 
      * Construct an identifier object using the provided ip and
@@ -57,11 +58,13 @@ public class TrustedClient
      */
     public TrustedClient(String ip,
                       String appId,
-                      String description)
+                      String description,
+                      String sharedSecret)
     {
         this.ip = ip;
         this.appId = appId;
         this.description = description;
+        this.sharedSecret = sharedSecret;
     }
     
     
@@ -73,14 +76,17 @@ public class TrustedClient
      *             domain combination is registered, otherwise <code>false</code>
      * @param ip
      *              the trusted client ip address
+     *                   
+     * @param appId
+     *              the trusted client ip address
      * @throws DAOException
      */
-    public static boolean isRegistered(String ip) throws ProcessingException
+    public static boolean isRegistered(String ip, String sharedSecret, String appId) throws ProcessingException
     {
         try
         {
             TrustedClientDAO tcdao = new TrustedClientDAO();
-            if (tcdao.retrieve(ip) == null)
+            if (tcdao.retrieve(ip, sharedSecret, appId) == null)
             {
                 return false;
             }
@@ -101,14 +107,16 @@ public class TrustedClient
      *             the TrustedClient object
      * @param ip
      *              the ip address
+     * @param appId
+     *              the appId
      * @throws ProcessingException
      */
-    public static TrustedClient retrieve(String ip) throws ProcessingException
+    public static TrustedClient retrieve(String ip, String sharedSecret, String appId) throws ProcessingException
     {
         try
         {
             TrustedClientDAO tcdao = new TrustedClientDAO();
-             return tcdao.retrieve(ip);
+             return tcdao.retrieve(ip, sharedSecret, appId);
         }
         catch (DAOException daoe)
         {
@@ -124,15 +132,24 @@ public class TrustedClient
      *              the ip address
      * @param description
      *        plain text description of the client
-     * 
+     * @param sharedSecret
+     *        the shared secret
+     *        
      * @throws DAOException
      */
     public static TrustedClient create(String ip,
-                                       String description) throws ProcessingException
+                                       String description, 
+                                       String sharedSecret) throws ProcessingException
     {
+        String appId = null;
+        if(ip == null || ip.trim().equals("")) {
+            appId = calculateHash(sharedSecret);
+        } else {
+            appId = calculateHash(ip);
+        }
         try
         {
-            TrustedClient tc = new TrustedClient(ip, calculateHash(ip), description); 
+            TrustedClient tc = new TrustedClient(ip, appId, description, sharedSecret); 
             TrustedClientDAO tcdao = new TrustedClientDAO();
             tcdao.create(tc);
             return tc;
@@ -153,16 +170,19 @@ public class TrustedClient
      *        plain text description of the client
      * @param appId
      *        the appId of the client
-     * 
+     * @param sharedSecret
+     *        the shared secret     
+     *         
      * @throws DAOException
      */
     public static TrustedClient create(String ip,
+                                       String appId,
                                        String description,
-                                       String appId) throws ProcessingException
+                                       String sharedSecret) throws ProcessingException
     {
         try
         {
-            TrustedClient tc = new TrustedClient(ip, appId, description); 
+            TrustedClient tc = new TrustedClient(ip, appId, description, sharedSecret); 
             TrustedClientDAO tcdao = new TrustedClientDAO();
             tcdao.create(tc);
             return tc;
@@ -207,6 +227,17 @@ public class TrustedClient
     public String getDescription()
     {
         return this.description;
+    }
+    
+    /** 
+     * Return the client shared_secret
+     * 
+     * @return String
+     *          the client description
+     */    
+    public String getSharedSecret()
+    {
+        return this.sharedSecret;
     }
 
     

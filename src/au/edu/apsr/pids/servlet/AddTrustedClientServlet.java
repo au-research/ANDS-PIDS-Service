@@ -116,22 +116,24 @@ public class AddTrustedClientServlet extends HttpServlet
         try
         {
             String ip = request.getParameter("ip");
+            String appId = request.getParameter("appId");
+            String sharedSecret = request.getParameter("sharedSecret");
             
-            if (ip == null)
+            if (ip == null && (sharedSecret == null || sharedSecret.trim().equals("")))
             {
-                log.error("Parameter 'ip' must be provided");
-                ServletSupport.doErrorResponse(response, "Parameter 'ip' must be provided", Constants.MESSAGE_TYPE_USER);
+                log.error("Parameter 'ip' or parameter 'sharedSecret' must be provided");
+                ServletSupport.doErrorResponse(response, "Parameter 'ip' or parameter 'sharedSecret' must be provided", Constants.MESSAGE_TYPE_USER);
                 return;
             }
 
-            if (ip.trim().equals(""))
+            if ((ip == null || ip.trim().equals("")) && (sharedSecret == null || sharedSecret.trim().equals("")))
             {
-                log.error("IP address must not contain empty values");
-                ServletSupport.doErrorResponse(response, "IP address must not contain empty values", Constants.MESSAGE_TYPE_USER);
+                log.error("IP address and sharedSecret must not both contain empty values and must be provided");
+                ServletSupport.doErrorResponse(response, "IP address and sharedSecret must not both contain empty values and must be provided", Constants.MESSAGE_TYPE_USER);
                 return;
             }
             
-            if (!ip.matches("[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}"))
+            if (!(ip == null || ip.trim().equals("")) && !ip.matches("[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}"))
             {
                 log.error("Invalid IP Address: " + ip);
                 ServletSupport.doErrorResponse(response, "IP address must not contain empty values", Constants.MESSAGE_TYPE_USER);
@@ -154,14 +156,14 @@ public class AddTrustedClientServlet extends HttpServlet
                 return;
             }
 
-            if (TrustedClient.isRegistered(ip))
+            if (TrustedClient.isRegistered(ip, sharedSecret, appId))
             {
-                log.error("The ip address provided is already registered");
-                ServletSupport.doErrorResponse(response, "The ip address provided is already registered", Constants.MESSAGE_TYPE_USER);                
+                log.error("The ip address or shared secret provided is already registered");
+                ServletSupport.doErrorResponse(response, "The ip address or shared secret provided is already registered", Constants.MESSAGE_TYPE_USER);                
                 return;
             }
 
-            String appId = request.getParameter("appId");
+
             
             if (appId != null)
             {
@@ -175,13 +177,13 @@ public class AddTrustedClientServlet extends HttpServlet
 
             // create an admin handle
             TrustedClient tc;
-            if (appId == null)
+            if (appId == null || appId.trim().equals(""))
             {
-                tc = TrustedClient.create(ip, desc);
+                tc = TrustedClient.create(ip, desc, sharedSecret);
             }
             else
             {
-                tc = TrustedClient.create(ip, desc, appId);
+                tc = TrustedClient.create(ip, appId, desc, sharedSecret);
             }
 
             HashMap<String,String> hm = new HashMap<String,String>();

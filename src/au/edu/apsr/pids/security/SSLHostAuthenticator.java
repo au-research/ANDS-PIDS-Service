@@ -18,6 +18,8 @@
  */
 package au.edu.apsr.pids.security;
 
+import java.nio.charset.Charset;
+import java.util.Base64;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -61,36 +63,43 @@ public class SSLHostAuthenticator implements Authenticator
     public boolean authenticate(HttpServletRequest request) throws ProcessingException
     {
         
-    	String ipAddress = request.getHeader("X-FORWARDED-FOR");
-        
-    	if (ipAddress == null) {  
+        String appId = null;
+        String sharedSecret = null;
+        final String authorization =request.getHeader("Authorization");
+        if (authorization != null && authorization.startsWith("Basic")) {
+            // Authorization: Basic base64credentials
+            String base64Credentials = authorization.substring("Basic".length()).trim();
+            String credentials = new String(Base64.getDecoder().decode(base64Credentials), Charset.forName("UTF-8")); 
+            // credentials = username:password
+            final String[] values = credentials.split(":",2);
+            appId =values[0];
+            sharedSecret = values[1];
+        }
+    	    String ipAddress = request.getHeader("X-FORWARDED-FOR");
+    	    if(appId == null) appId = (String)properties.get("appId");
+    	    if(sharedSecret == null) sharedSecret = (String)properties.get("sharedSecret");
+    	    
+    	    if (ipAddress == null) {  
             ipAddress = request.getRemoteAddr();  
          }
-        
-    	TrustedClient tc = TrustedClient.retrieve(ipAddress);
-        
+    	    
+    	    TrustedClient tc = TrustedClient.retrieve(ipAddress, sharedSecret, appId);
+    	    
         if (tc == null)
         {
-            log.error("Request Denied - unregistered client: " + request.getRemoteAddr() + ". Client must be registered in order to use service");
+            log.error("Request Denied - unregistered client: " + appId + ". Client must be registered in order to use service");
             return false;
         }
 
         String authDomain = (String)properties.get("authDomain");
         String identifier = (String)properties.get("identifier");
-        String appId = (String)properties.get("appId");
         
         if (authDomain == null || identifier == null || appId == null)
         {
             log.error("authDomain and/or identifier and/or appId is null");
             return false;
         }
-        
-        if (!tc.getAppId().equals(appId))
-        {
-            log.error("The supplied application identifier does not match registered identifier");
-            return false;
-        }
-        
+         
         if (!isRegisteredIdentifier(identifier, authDomain))
         {
             try
