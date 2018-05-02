@@ -135,7 +135,13 @@ public class Handle
         values[i+2].setIndex(Constants.AGENT_DESC_APPIDX);
         values[i+2].setType(Constants.XT_APPID);
         values[i+2].setAnyoneCanRead(false);
-        values[i+2].setData(Util.encodeString(identifier.getAppid()));
+
+        // getAppid would be null for Identifier who does not have APPID yet
+        // leaving blank for now
+        if (identifier.getAppid() != null) {
+            values[i + 2].setData(Util.encodeString(identifier.getAppid()));
+        }
+        
         values[i+2].setTTL(Constants.DEFAULT_TTL);
         
         AbstractResponse response = handleObject.createHandle(values);
