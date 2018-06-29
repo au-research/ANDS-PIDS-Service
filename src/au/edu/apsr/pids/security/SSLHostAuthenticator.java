@@ -19,18 +19,23 @@
 package au.edu.apsr.pids.security;
 
 import java.nio.charset.Charset;
-import java.util.Base64;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.StringUtils;
+
 import net.handle.hdllib.HandleException;
+import net.handle.hdllib.HandleValue;
+import net.handle.hdllib.Util;
 import au.edu.apsr.pids.dao.DAOException;
 import au.edu.apsr.pids.to.Handle;
 import au.edu.apsr.pids.to.Identifier;
 import au.edu.apsr.pids.to.TrustedClient;
+import au.edu.apsr.pids.util.Constants;
 import au.edu.apsr.pids.util.ProcessingException;
 
 /**
@@ -61,28 +66,58 @@ public class SSLHostAuthenticator implements Authenticator
      * @throws ProcessingException
      */
     public boolean authenticate(HttpServletRequest request) throws ProcessingException
-    {
+    { 
         
-        String appId = null;
-        String sharedSecret = null;
-        final String authorization =request.getHeader("Authorization");
+    		// username    
+    		String appId = null; 
+    		// password
+        String sharedSecret = null; 
+        // identifier####authDomain will be the value of the owner handle of this Handle
+        String authDomain = null; 
+        String identifier = null;
+        
+        String ipAddress = null;
+        
+        final String authorization = request.getHeader("Authorization");
         if (authorization != null && authorization.startsWith("Basic")) {
             // Authorization: Basic base64credentials
             String base64Credentials = authorization.substring("Basic".length()).trim();
-            String credentials = new String(Base64.getDecoder().decode(base64Credentials), Charset.forName("UTF-8")); 
+            String credentials = StringUtils.newStringUtf8(Base64.decodeBase64(base64Credentials));; 
             // credentials = username:password
             final String[] values = credentials.split(":",2);
             appId =values[0];
             sharedSecret = values[1];
         }
-    	    String ipAddress = request.getHeader("X-FORWARDED-FOR");
-    	    if(appId == null) appId = (String)properties.get("appId");
-    	    if(sharedSecret == null) sharedSecret = (String)properties.get("sharedSecret");
+    	       	    
+    	    if(appId == null) {
+    	    		if((appId = (String)properties.get("appId")) == null) {
+    	                log.error("appId is null");
+    	                return false;
+    	    		};
+    	    }
+    	                 
+        if ((authDomain = (String)properties.get("authDomain")) == null)
+        {
+            log.error("authDomain is null");
+            return false;
+        }
+                
+        if ((identifier = (String)properties.get("identifier")) == null)
+        {
+            log.error("identifier is null");
+            return false;
+        }
+         
+        // shared secret is optional if trusted client has valid IPs registered
+        
+    	    if(sharedSecret == null) {
+    	    		sharedSecret = (String)properties.get("sharedSecret");
+    	    }
     	    
-    	    if (ipAddress == null) {  
-            ipAddress = request.getRemoteAddr();  
-         }
-    	    
+        if((ipAddress = request.getHeader("X-FORWARDED-FOR")) == null){
+        		ipAddress = request.getRemoteAddr();  
+        }
+    	       
     	    TrustedClient tc = TrustedClient.retrieve(ipAddress, sharedSecret, appId);
     	    
         if (tc == null)
@@ -90,21 +125,12 @@ public class SSLHostAuthenticator implements Authenticator
             log.error("Request Denied - unregistered client: " + appId + ". Client must be registered in order to use service");
             return false;
         }
-
-        String authDomain = (String)properties.get("authDomain");
-        String identifier = (String)properties.get("identifier");
-        
-        if (authDomain == null || identifier == null || appId == null)
-        {
-            log.error("authDomain and/or identifier and/or appId is null");
-            return false;
-        }
          
         if (!isRegisteredIdentifier(identifier, authDomain))
         {
             try
             {
-            	Handle handle = Handle.createAdmin(identifier, authDomain, appId);
+            		Handle.createAdmin(identifier, authDomain, appId);
                 log.info("Identifier " + identifier + "," + authDomain + " is not a registered user of this service, added");
             }
             catch (DAOException daoe)
@@ -118,7 +144,29 @@ public class SSLHostAuthenticator implements Authenticator
                 throw new ProcessingException(daoe);
             }
         }
+        
+        try {
+	        Identifier identifierObj = Identifier.retrieve(identifier, authDomain);
+	        if(identifierObj.getAppid() == null) {
+	            String handleString = identifierObj.getHandle();
+	            Handle iHandle = Handle.find(handleString);            
+	            HandleValue[] values = new HandleValue[1];
+	            values[0] = new HandleValue();
+	            values[0].setIndex(Constants.AGENT_DESC_APPIDX);
+	            values[0].setType(Constants.XT_APPID);
+	            values[0].setAnyoneCanRead(false);
+	            values[0].setData(Util.encodeString(appId));
+	            values[0].setTTL(Constants.DEFAULT_TTL);
+	            iHandle.addValue(values);
+	        }
+        }
+        catch (HandleException | DAOException daoe)
+        {
+            log.error("Caught Handle Exception during add appId to existing Identifier:", daoe);
+            throw new ProcessingException(daoe);
+        }
 
+        
         return true;
     }
 
