@@ -124,14 +124,7 @@ public class Handle
         values[i+1].setType(Constants.XT_AGENTID);
         values[i+1].setData(Util.encodeString(identifier.getHandle()));
         values[i+1].setTTL(Constants.DEFAULT_TTL);
-        
-        values[i+2] = new HandleValue();
-        values[i+2].setIndex(Constants.AGENT_DESC_APPIDX);
-        values[i+2].setType(Constants.XT_APPID);
-        values[i+2].setAnyoneCanRead(false);
-        values[i+2].setData(Util.encodeString(identifier.getAppid()));
-        values[i+2].setTTL(Constants.DEFAULT_TTL);
-        
+
         AbstractResponse response = handleObject.createHandle(values);
 
         if (response.responseCode == AbstractMessage.RC_SUCCESS)
@@ -217,8 +210,8 @@ public class Handle
             obj.addProperty("identifier",identifier);
             obj.addProperty("authDomain",authDomain);
             obj.addProperty("appId",appId);
-             
-            log.info(obj.getAsString());
+            String jsonStr = new Gson().toJson(obj);
+            log.info(jsonStr);
         	
             log.info("Successfully created admin handle: " + handleObject.getHandle());
             return handleObject;
