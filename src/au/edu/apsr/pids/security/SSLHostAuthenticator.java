@@ -130,7 +130,7 @@ public class SSLHostAuthenticator implements Authenticator
         {
             try
             {
-            		Handle.createAdmin(identifier, authDomain, appId);
+                Handle.createAdmin(identifier, authDomain, appId);
                 log.info("Identifier " + identifier + "," + authDomain + " is not a registered user of this service, added");
             }
             catch (DAOException daoe)
@@ -159,6 +159,10 @@ public class SSLHostAuthenticator implements Authenticator
 	            values[0].setTTL(Constants.DEFAULT_TTL);
 	            iHandle.addValue(values);
 	        }
+	        if(!identifierObj.getAppid().equals(appId)){
+                log.info("APPID MISMATCH: "+  identifier + "#####" + authDomain + "'s AppID: " +
+                        identifierObj.getAppid() + " is different from provided appID:" + appId);
+            }
         }
         catch (HandleException | DAOException daoe)
         {

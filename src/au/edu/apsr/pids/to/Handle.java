@@ -665,7 +665,7 @@ public class Handle
       * 
       * @return AbstractResponse
       *           the handle server response to the create request
-      * @param HandleValue[]
+      * @param hv
       *          An array of HandleValue objects
       * @throws HandleException
       */
