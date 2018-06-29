@@ -138,12 +138,12 @@ public class Handle
         {
             JsonObject obj = new JsonObject();
             obj.addProperty("status","success");
-            obj.addProperty("handle",handleObject.getHandle());
-            obj.addProperty("identifier",identifier.getIdentifier());
-            obj.addProperty("authDomain",identifier.getAuthDomain() );
-            obj.addProperty("appId",identifier.getAppid());
-             
-            log.info(obj.getAsString());
+            obj.addProperty("handle", handleObject.getHandle());
+            obj.addProperty("identifier", identifier.getIdentifier());
+            obj.addProperty("authDomain", identifier.getAuthDomain() );
+            obj.addProperty("appId", identifier.getAppid());
+            String jsonStr = new Gson().toJson(obj);
+            log.info(jsonStr);
             return handleObject;
         }
         else

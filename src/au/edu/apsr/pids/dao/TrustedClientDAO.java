@@ -170,7 +170,7 @@ public class TrustedClientDAO
             ArrayList<TrustedClient> clients = new ArrayList<TrustedClient>();
             while (rs.next())
             {
-                clients.add(new TrustedClient(rs.getString("ip_address"),rs.getString("app_id"), rs.getString("description"),rs.getString("sharedSecret")));
+                clients.add(new TrustedClient(rs.getString("ip_address"),rs.getString("app_id"), rs.getString("description"),rs.getString("shared_secret")));
             }
             return clients;
         }
