@@ -102,7 +102,7 @@ public class Handle
         
         AdminRecord admin = handleObject.createAdminRecord(Constants.NA_HANDLE_PREFIX + hc.getPrefix(), Constants.ADMIN_GROUP_IDX);
         
-        HandleValue values[] = new HandleValue[hv.length + 3];
+        HandleValue values[] = new HandleValue[hv.length + 2];
 
         // load the passed values into the value array
         int i;
