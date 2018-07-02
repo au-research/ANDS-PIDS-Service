@@ -43,18 +43,13 @@ import net.handle.hdllib.Util;
 
 import au.edu.apsr.pids.dao.DAOException;
 import au.edu.apsr.pids.dao.HandleDAO;
-import au.edu.apsr.pids.servlet.MintServlet;
 import au.edu.apsr.pids.util.HandleConfig;
 import au.edu.apsr.pids.util.Constants;
 import au.edu.apsr.pids.util.HandleSupport;
-import au.edu.apsr.pids.util.ProcessingException;
-import au.edu.apsr.pids.util.ServletSupport;
-
 import org.apache.log4j.Logger;
-import org.json.simple.*;
+import com.google.gson.*;
 
 import java.io.IOException;
-import java.io.StringWriter;
 /**
  * Class representing a Handle object
  * 
@@ -105,10 +100,9 @@ public class Handle
         HandleConfig hc = HandleConfig.getHandleConfig();
         handleObject.setHandle(hc.getPrefix() + '/' + Handle.getNextSuffix());
         
-        String idHash = null;
         AdminRecord admin = handleObject.createAdminRecord(Constants.NA_HANDLE_PREFIX + hc.getPrefix(), Constants.ADMIN_GROUP_IDX);
         
-        HandleValue values[] = new HandleValue[hv.length + 3];
+        HandleValue values[] = new HandleValue[hv.length + 2];
 
         // load the passed values into the value array
         int i;
@@ -135,18 +129,14 @@ public class Handle
 
         if (response.responseCode == AbstractMessage.RC_SUCCESS)
         {
-            JSONObject obj = new JSONObject();
-
-            obj.put("status","success");
-            obj.put("handle",handleObject.getHandle());
-            obj.put("identifier",identifier.getIdentifier());
-            obj.put("authDomain",identifier.getAuthDomain() );
-            obj.put("appId",identifier.getAppid());
-            StringWriter out = new StringWriter();
-            obj.writeJSONString(out);
-            
-            String jsonText = out.toString();
-            log.info(jsonText);
+            JsonObject obj = new JsonObject();
+            obj.addProperty("status","success");
+            obj.addProperty("handle", handleObject.getHandle());
+            obj.addProperty("identifier", identifier.getIdentifier());
+            obj.addProperty("authDomain", identifier.getAuthDomain() );
+            obj.addProperty("appId", identifier.getAppid());
+            String jsonStr = new Gson().toJson(obj);
+            log.info(jsonStr);
             return handleObject;
         }
         else
@@ -214,6 +204,15 @@ public class Handle
 
         if (response.responseCode == AbstractMessage.RC_SUCCESS)
         {
+            JsonObject obj = new JsonObject();
+            obj.addProperty("status","success");
+            obj.addProperty("handle",handleObject.getHandle());
+            obj.addProperty("identifier",identifier);
+            obj.addProperty("authDomain",authDomain);
+            obj.addProperty("appId",appId);
+            String jsonStr = new Gson().toJson(obj);
+            log.info(jsonStr);
+        	
             log.info("Successfully created admin handle: " + handleObject.getHandle());
             return handleObject;
         }
@@ -618,7 +617,6 @@ public class Handle
      public static List<String> getHandleStrings(Identifier identifier,
                                                  String startHandle) throws HandleException, DAOException
      {
-         Handle handle = null;
          HandleDAO hdao = new HandleDAO();
          return hdao.getHandles(identifier, startHandle);
      }
@@ -667,7 +665,7 @@ public class Handle
       * 
       * @return AbstractResponse
       *           the handle server response to the create request
-      * @param HandleValue[]
+      * @param hv
       *          An array of HandleValue objects
       * @throws HandleException
       */
