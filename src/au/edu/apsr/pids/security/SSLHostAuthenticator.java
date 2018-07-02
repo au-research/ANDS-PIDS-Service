@@ -159,7 +159,7 @@ public class SSLHostAuthenticator implements Authenticator
 	            values[0].setTTL(Constants.DEFAULT_TTL);
 	            iHandle.addValue(values);
 	        }
-	        if(!identifierObj.getAppid().equals(appId)){
+	        else if(!identifierObj.getAppid().equals(appId)){
                 log.info("APPID MISMATCH: "+  identifier + "#####" + authDomain + "'s AppID: " +
                         identifierObj.getAppid() + " is different from provided appID:" + appId);
             }
